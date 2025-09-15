@@ -1,0 +1,16 @@
+{
+  "name": "youtube-to-spotify-playlist",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx watch --env-file=.env src/index.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.4.0"
+  }
+}
