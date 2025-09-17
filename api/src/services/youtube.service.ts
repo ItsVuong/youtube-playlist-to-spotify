@@ -1,30 +1,62 @@
-import { spawn } from "child_process";
-import path from "path";
+import axios from "axios";
 
-export function getVideoInfo(videoUrl: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    // point to python inside project venv
-    const pythonPath = path.resolve("venv/bin/python");
+async function extractYtInitialData(videoUrl: string) {
 
-    const yt = spawn(pythonPath, ["-m", "yt_dlp", "-J", videoUrl]);
-
-    let output = "";
-    let errorOutput = "";
-
-    yt.stdout.on("data", (chunk) => (output += chunk.toString()));
-    yt.stderr.on("data", (chunk) => (errorOutput += chunk.toString()));
-
-    yt.on("close", (code) => {
-      if (code !== 0) {
-        return reject(errorOutput || `yt-dlp exited with code ${code}`);
-      }
-      try {
-        resolve(JSON.parse(output));
-      } catch {
-        reject("Failed to parse yt-dlp output");
-      }
-    });
+  const { data: html } = await axios.get(videoUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
   });
+
+  const match = html.match(/var ytInitialData = (.*?);/);
+
+  if (!match || !match[1]) {
+    throw new Error('Could not find ytInitialData.');
+  }
+
+  const dataObject = JSON.parse(match[1]);
+
+  return dataObject;
 }
 
-export const YoutubeService = {getVideoInfo}
+// Ultilities functions to extract data from ytInitialData
+function getTitleFromYtInitialData(ytInitialData: any): string | null {
+  return ytInitialData?.contents?.twoColumnWatchNextResults?.results?.results
+    ?.contents?.find((c: any) => c.videoPrimaryInfoRenderer)
+    ?.videoPrimaryInfoRenderer?.title?.runs?.[0]?.text || null;
+}
+
+function getDescriptionsFromInitialData(ytInitialData: any): any {
+  return ytInitialData?.contents?.twoColumnWatchNextResults?.results?.results
+    ?.contents?.find((c: any) => c.videoSecondaryInfoRenderer)
+    ?.videoSecondaryInfoRenderer?.attributedDescription?.content || null;
+}
+
+function getChaptersFromInitialData(ytInitialData: any): any {
+  const chapterData = ytInitialData?.playerOverlays
+    ?.playerOverlayRenderer?.decoratedPlayerBarRenderer
+    ?.decoratedPlayerBarRenderer
+    ?.playerBar?.multiMarkersPlayerBarRenderer
+    ?.markersMap[0]?.value?.chapters;
+
+  const extractedChapterTitles = chapterData.map((item: any) => item?.chapterRenderer?.title?.simpleText)
+  return extractedChapterTitles
+}
+
+function findNode(obj: any, key: string): any[] {
+  let results: any[] = [];
+  if (obj && typeof obj === "object") {
+    for (const [k, v] of Object.entries(obj)) {
+      if (k === key) results.push(v);
+      results = results.concat(findNode(v, key));
+    }
+  }
+  return results
+}
+
+export const YoutubeService = {
+  extractYtInitialData,
+  getTitleFromYtInitialData,
+  getDescriptionsFromInitialData,
+  getChaptersFromInitialData
+}
