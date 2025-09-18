@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getVideoInfo } from "../controllers/youtube.controller.js";
+import { getNextData, getVideoInfo } from "../controllers/youtube.controller.js";
 
 const youtubeRoutes: Router = Router();
 
 youtubeRoutes.post("/", getVideoInfo);
+youtubeRoutes.post("/next", getNextData);
 
 export default youtubeRoutes;
 
