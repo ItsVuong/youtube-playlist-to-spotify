@@ -1,7 +1,6 @@
 import axios from "axios";
-import { HttpException } from "../exceptions/HttpException.js";
 
-interface VideoInfo {
+export interface VideoInfo {
   title: string | null;
   description: string | null;
   chapters: string[] | null;
@@ -91,7 +90,7 @@ async function getVideoInformation(videoUrl: string): Promise<VideoInfo> {
 // Ultilities functions to extract data from ytInitialData
 function getFirstComments(nextDataObject: any) {
   const rawCommentsData = findNodes(nextDataObject?.frameworkUpdates, "commentEntityPayload")
-  if (!rawCommentsData || rawCommentsData.length === 0)
+  if (!rawCommentsData || rawCommentsData?.length === 0)
     return null
 
   const comments = rawCommentsData.map((item: any) => item?.properties?.content?.content ?? null)
@@ -129,7 +128,7 @@ function getChaptersFromInitialData(ytInitialData: any): string[] | null {
   //  ?.markersMap[0]?.value?.chapters;
 
   const chapters = findFirstNode(ytInitialData?.playerOverlays, "chapters")
-  if (!chapters || chapters.length === 0)
+  if (!chapters || chapters?.length === 0)
     return null
 
   const extractedChapterTitles = chapters.map((item: any) => item?.chapterRenderer?.title?.simpleText) || null
@@ -138,7 +137,7 @@ function getChaptersFromInitialData(ytInitialData: any): string[] | null {
 
 function getIncludedMusicFromInitialData(ytInitialData: any): string[] | null {
   const horizontalCardListRenderer = findFirstNode(ytInitialData?.engagementPanels, "horizontalCardListRenderer")
-  if (!horizontalCardListRenderer && horizontalCardListRenderer.length === 0) {
+  if (!horizontalCardListRenderer && horizontalCardListRenderer?.length === 0) {
     return null
   }
 
