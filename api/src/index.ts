@@ -11,6 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser())
 app.use(session({
+  resave: false,
   secret: "keyboard cat",
   saveUninitialized: true,
 }))

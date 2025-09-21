@@ -1,12 +1,23 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig, type Method } from "axios";
 import { HttpException } from "../exceptions/HttpException.js";
-import type { Request } from "express";
 
 const client_id = process.env.SPOTIFY_CLIENT_ID || "";
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET || "";
 const redirect_uri = process.env.SPOTIFY_REDIRECT_URI || "";
 
-export async function exchangeCodeForToken(code: string) {
+export interface SpotifyTokens {
+  access_token: string,
+  refresh_token?: string,
+  expire_at?: number,
+}
+
+interface SpotifyCallOptions {
+  method?: Method;
+  params?: Record<string, any>;
+  body?: Record<string, any>;
+}
+
+async function exchangeCodeForToken(code: string) {
   const data = new URLSearchParams({
     code,
     redirect_uri,
@@ -33,24 +44,47 @@ export async function exchangeCodeForToken(code: string) {
   }
 }
 
-// spotify.service.ts
-export async function fetchSpotifyTokens(tokens: { access_token: string, refresh_token?: string }, endpoint: string) {
+// axios wrapper for spotify apis
+async function callSpotify(
+  tokens: SpotifyTokens,
+  endpoint: string,
+  options: SpotifyCallOptions = {}
+): Promise<{ data: any; newAccessToken?: string; newRefreshToken?: string }> {
+  const { method = "GET", params, body } = options;
+
+  const axiosRequestConfig: AxiosRequestConfig = {
+    url: `https://api.spotify.com/v1/${endpoint}`,
+    method,
+    headers: {
+      Authorization: `Bearer ${tokens.access_token}`,
+      "Content-Type": "application/json",
+    },
+  }
+
+  if (body) {
+    axiosRequestConfig.data = body
+  }
+  if (params) {
+    axiosRequestConfig.params = params
+  }
+
   try {
-    return {
-      data: (await axios.get(`https://api.spotify.com/v1/${endpoint}`, {
-        headers: { Authorization: `Bearer ${tokens.access_token}` },
-      })).data,
-    };
+    const response = await axios.request(axiosRequestConfig);
+
+    return { data: response.data };
   } catch (err: any) {
     if (err.response?.status === 401 && tokens.refresh_token) {
+      // Refresh token
       const newToken = await refreshSpotifyToken(tokens.refresh_token);
-      const response = await axios.get(`https://api.spotify.com/v1/${endpoint}`, {
-        headers: { Authorization: `Bearer ${newToken.access_token}` },
-      });
+      axiosRequestConfig.headers!.Authorization = `Bearer ${newToken.access_token}`
+
+      // Retry once with new token
+      const retryResponse = await axios.request(axiosRequestConfig);
+
       return {
-        data: response.data,
+        data: retryResponse.data,
         newAccessToken: newToken.access_token,
-        newRefreshToken: newToken?.refresh_token || null,
+        newRefreshToken: newToken.refresh_token ?? undefined,
       };
     }
     throw err;
@@ -75,9 +109,24 @@ async function refreshSpotifyToken(refresh_token: string) {
   return response.data;
 }
 
+async function searchTrack(
+  tokens: SpotifyTokens,
+  track: { artist?: string | undefined, title: string }
+) {
+  let q = `track:${track.title}`;
+  if (track.artist) {
+    q += ` artist:${track.artist}`;
+  }
+
+  const response = await callSpotify(tokens, "search", {
+    params: { q, type: "track", market: "ES", limit: 15, offset: 0 }
+  });
+
+  return response;
+}
 
 export const SpotifyService = {
   exchangeCodeForToken,
-  fetchSpotifyTokens,
-  refreshSpotifyToken
+  callSpotify,
+  refreshSpotifyToken, searchTrack
 }

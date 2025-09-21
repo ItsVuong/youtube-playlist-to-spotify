@@ -36,12 +36,29 @@ export async function authCallback(req: Request, res: Response, next: NextFuncti
       throw new HttpException(400, "Invalid request")
 
     const tokenData = await SpotifyService.exchangeCodeForToken(code as string)
+    console.log(tokenData)
     req.session.spotify = {
       access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token
+      refresh_token: tokenData.refresh_token,
+      expires_at: Date.now() + tokenData.expires_in * 1000
     }
-    console.log(req.session.spotify)
     return res.json({ success: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function searchTrack(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { artist, title } = req.query as { artist: string; title: string };
+    const spotifyTokens = req.session!.spotify
+    console.log(spotifyTokens, title)
+
+    if (!spotifyTokens || !title) throw new Error()
+
+    const searchResult = await SpotifyService.searchTrack(spotifyTokens,
+      { title, artist })
+    res.json(searchResult.data)
   } catch (error) {
     next(error)
   }
@@ -49,17 +66,7 @@ export async function authCallback(req: Request, res: Response, next: NextFuncti
 
 export async function getProfileInfo(req: Request, res: Response, next: NextFunction) {
   try {
-    const { data, newAccessToken, newRefreshToken } = await SpotifyService.fetchSpotifyTokens(
-      req.session.spotify!,
-      "me"
-    );
-
-    if (newAccessToken) {
-      req.session.spotify!.access_token = newAccessToken;
-    }
-    if (newRefreshToken) {
-      req.session.spotify!.refresh_token = newRefreshToken;
-    }
+    const data = await callAndSetTokens(req, "me")
 
     const simplified = {
       username: data.display_name,
@@ -73,11 +80,18 @@ export async function getProfileInfo(req: Request, res: Response, next: NextFunc
   }
 }
 
-export async function testRefreshToken(req: Request, res: Response, next: NextFunction) {
-  const refreshToken = req.session.spotify?.refresh_token
-  if (!refreshToken)
-    throw new HttpException(401, "Unauthorized")
-  const refreshTokenResponse = await SpotifyService.refreshSpotifyToken(refreshToken)
-  console.log(refreshTokenResponse)
-  return res.json(refreshTokenResponse)
+async function callAndSetTokens(req: Request, endpoint: string): Promise<any> {
+  const { data, newAccessToken, newRefreshToken } = await SpotifyService.callSpotify(
+    req.session.spotify!,
+    endpoint
+  );
+
+  if (newAccessToken) {
+    req.session.spotify!.access_token = newAccessToken;
+  }
+  if (newRefreshToken) {
+    req.session.spotify!.refresh_token = newRefreshToken;
+  }
+  return data
 }
+

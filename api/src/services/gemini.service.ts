@@ -4,7 +4,7 @@ import type { VideoInfo } from "./youtube.service.js";
 const apiKey = process.env.GEMINI_API_KEY || ""
 const genAI = new GoogleGenAI({ apiKey });
 
-async function getSongsFromInfo(videoInfo: VideoInfo) {
+async function getSongsFromInfo(videoInfo: VideoInfo): Promise<{song_title: string, artist_name: string}[] | null> {
   const prompt = `Extract all songs and their corresponding artists from the following YouTube video data. If the artist is not provided, look it up using your knowledge and Google Search. Return the results as a JSON array of objects, with each object having two properties: 'song_title' and 'artist_name'. If no songs or tracklist is provided, return NULL.
   
   Video Data:
