@@ -1,0 +1,63 @@
+.track-card {
+  background-color: #181818;
+  border-radius: 12px;
+  padding: 16px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.track-card:hover {
+  background-color: #282828;
+}
+
+.track-image {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.track-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.play-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #1db954;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.track-image:hover .play-button {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.track-info h3 {
+  font-size: 16px;
+  margin: 0;
+  color: #fff;
+}
+
+.track-info p {
+  font-size: 14px;
+  margin: 0;
+  color: #b3b3b3;
+}

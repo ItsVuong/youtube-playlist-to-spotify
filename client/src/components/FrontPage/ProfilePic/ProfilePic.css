@@ -1,0 +1,39 @@
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  margin-top: 8px;
+  background: #282828;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  min-width: 120px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+  background: #1db954;
+}
