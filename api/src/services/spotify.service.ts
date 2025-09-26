@@ -7,7 +7,7 @@ const redirect_uri = process.env.SPOTIFY_REDIRECT_URI || "";
 
 export interface SpotifyTokens {
   access_token: string,
-  refresh_token?: string,
+  refresh_token: string | undefined,
   expire_at?: number,
 }
 
@@ -122,11 +122,37 @@ async function searchTrack(
     params: { q, type: "track", market: "ES", limit: 15, offset: 0 }
   });
 
-  return response;
+  return response.data.tracks.items;
+}
+
+async function getProfile(tokens: SpotifyTokens) {
+  const response = await callSpotify(tokens, "me")
+  return response
+}
+
+async function createPlaylist(tokens: SpotifyTokens, userId: string, playlistName: string, description: string, isPublic: boolean) {
+  const response = await callSpotify(tokens,
+    `users/${userId}/playlists`,
+    { body: { name: playlistName, description, public: isPublic } });
+  return response
+}
+
+async function addToPlaylist(tokens: SpotifyTokens, playlistId: string, trackUris: string[], position: number = 0) {
+  const response = await callSpotify(tokens,
+    `playlists/${playlistId}/tracks`,
+    {
+      body: {
+        uris: trackUris, position
+      }
+    })
+  return response
 }
 
 export const SpotifyService = {
   exchangeCodeForToken,
   callSpotify,
-  refreshSpotifyToken, searchTrack
+  refreshSpotifyToken, searchTrack,
+  getProfile,
+  createPlaylist,
+  addToPlaylist
 }
