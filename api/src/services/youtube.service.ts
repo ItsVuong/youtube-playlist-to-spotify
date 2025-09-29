@@ -78,10 +78,12 @@ async function getVideoInformation(videoUrl: string): Promise<VideoInfo> {
   let firstComment;
   if (rawInfo.continuationToken) {
     const ytNextData = await getNextData(rawInfo.continuationToken)
-    firstComment = getFirstComments(ytNextData)[0];
+    const firstComments = getFirstComments(ytNextData);
+    if(firstComments?.length > 0)
+    firstComment = firstComments[0]
   }
 
-  if (!description && !chapters && !musics || !firstComment)
+  if (!description && !chapters && !musics && !firstComment)
     throw new Error("Couldn't get video information!")
 
   return { title, description, chapters, musics, firstComment }

@@ -133,7 +133,7 @@ async function getProfile(tokens: SpotifyTokens) {
 async function createPlaylist(tokens: SpotifyTokens, userId: string, playlistName: string, description: string, isPublic: boolean) {
   const response = await callSpotify(tokens,
     `users/${userId}/playlists`,
-    { body: { name: playlistName, description, public: isPublic } });
+    { method: "POST",body: { name: playlistName, description, public: isPublic } });
   return response
 }
 
@@ -141,6 +141,7 @@ async function addToPlaylist(tokens: SpotifyTokens, playlistId: string, trackUri
   const response = await callSpotify(tokens,
     `playlists/${playlistId}/tracks`,
     {
+      method: "POST",
       body: {
         uris: trackUris, position
       }

@@ -27,7 +27,6 @@ export function authorize(req: Request, res: Response, next: NextFunction) {
 export async function authCallback(req: Request, res: Response, next: NextFunction) {
   try {
     const state = req.cookies?.spotify_auth_state
-    console.log("state: ", state)
 
     if (!state || state !== req.query?.state)
       throw new HttpException(400, "Invalid request")
@@ -37,7 +36,6 @@ export async function authCallback(req: Request, res: Response, next: NextFuncti
       throw new HttpException(400, "Invalid request")
 
     const tokenData = await SpotifyService.exchangeCodeForToken(code as string)
-    console.log(tokenData)
     req.session.spotify = {
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
@@ -67,7 +65,6 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
       res.clearCookie("connect.sid");
       return res.json({ success: true });
     });
-    console.log("session deleted")
   } catch (error) {
     next(error);
   }
@@ -76,8 +73,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 export async function searchTrack(req: Request, res: Response, next: NextFunction) {
   try {
     const { artist, title } = req.query as { artist: string; title: string };
-    const spotifyTokens = req.session!.spotify
-    console.log(spotifyTokens, title)
+    const spotifyTokens = await checkToken(req);
 
     if (!spotifyTokens || !title) throw new Error()
 
@@ -116,6 +112,15 @@ export async function createPlaylist(req: Request, res: Response, next: NextFunc
       if (!profile.data?.id) throw new Error("Failed to fetch Spotify profile");
       spotifyInfo.id = profile.data.id;
     }
+
+    // Validate inputs
+    if (typeof playlistName != "string" || playlistName?.length > 100 ||
+      typeof description != "string" || description?.length > 255 ||
+      typeof isPublic != "boolean"
+    ) throw new HttpException(400, "Invalid input")
+
+    if (!playlistName || playlistName.trim() == "")
+      throw new HttpException(400, "Please provide playlist name")
 
     const createdPlaylistRes = await SpotifyService.createPlaylist(
       tokens,
