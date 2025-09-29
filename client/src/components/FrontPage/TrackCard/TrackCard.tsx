@@ -38,7 +38,10 @@ function TrackCard({ track, isSelected, onOption,
           src={track.album.images[0].url || ""}
           alt="Track's image"
         />
+        {/*
+          Spotify doesn't provive preview anymore, bummer :((((
         <button className="play-button">▶</button>
+        */}
       </div>
 
       {
@@ -66,6 +69,11 @@ function TrackCard({ track, isSelected, onOption,
 
       {isSelected && (
         <ul className="options-dropdown">
+          <li><a
+            target="_blank" rel="noopener noreferrer"
+            href={track.external_urls.spotify}>
+            Go to song
+          </a></li>
           <li onClick={onTrackSelect}>Other song</li>
           <li style={{ color: "red" }}
             onClick={onRemove}

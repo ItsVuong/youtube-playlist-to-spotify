@@ -51,10 +51,6 @@ function CreatePlaylistModal({ tracks, isOpen, onClose, setModal }: { tracks?: a
 
       const response = await createPlaylist({ tracks: trackUris as string[], playlistName, description, isPublic })
       console.log(response.data)
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error?.response?.error || "")
-    } finally {
       toast.update(loadingId, {
         render: "Playlist created",
         type: "success",
@@ -63,6 +59,17 @@ function CreatePlaylistModal({ tracks, isOpen, onClose, setModal }: { tracks?: a
         closeOnClick: true,
       });
 
+    } catch (error: any) {
+      console.log(error);
+      toast.update(loadingId, {
+        render: error?.response?.data?.error || "Fail to create playlist",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+        closeOnClick: true,
+      });
+
+    } finally {
       setLoadingCreate(false)
       setModal(false)
     }

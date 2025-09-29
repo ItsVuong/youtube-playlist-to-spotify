@@ -91,9 +91,8 @@
 
 .options-dropdown {
   position: absolute;
-  bottom: -90px;
+  bottom: -130px;
   right: 0px;
-  right: 0;
   background: #282828;
   border-radius: 8px;
   list-style: none;
@@ -109,6 +108,11 @@
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
+}
+
+.options-dropdown a {
+  color: inherit;
+  text-decoration: none;
 }
 
 .options-dropdown li:hover {
