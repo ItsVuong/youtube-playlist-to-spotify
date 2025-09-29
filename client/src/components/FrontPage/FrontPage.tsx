@@ -6,7 +6,6 @@ import ProfilePic from './ProfilePic/ProfilePic';
 import TrackList from './TrackCard/TrackList';
 import { ToastContainer, toast } from 'react-toastify';
 import SignInModal from './SignInModal/SignInModal';
-import { SpotifyTrack } from '../../types/spotify';
 
 function FrontPage() {
   const authContext = useAuth()
@@ -84,7 +83,11 @@ function FrontPage() {
         <div className='main-title'>
           <h2>YOUTUBE PLAYLIST TO SPOTIFY</h2>
           <span>Quickly create a playlist from playlist videos (not youtube playlist)</span><br />
-          <span>The playlist has to be provided somewhere in the video (chapters, description, comment) for this to work</span>
+          <span>
+            <strong>
+              The playlist has to be provided somewhere in the video (chapters, description, comment) for this to work
+            </strong>
+          </span>
         </div>
         <form className='main-search-form' onSubmit={searchHandler}>
           <input
@@ -97,9 +100,14 @@ function FrontPage() {
             submit
           </button>
         </form>
-        <div>
-          <TrackList tracks={tracks}/>
-        </div>
+        {tracks.length > 0 &&
+          <div style={{ width: "100%" }}>
+            <TrackList
+              tracks={tracks}
+              setTracks={setTracks}
+            />
+          </div>
+        }
       </div>
       <ToastContainer position='bottom-right' />
       <SignInModal isOpen={signInModal} onClose={() => setSignInModal(false)} />
