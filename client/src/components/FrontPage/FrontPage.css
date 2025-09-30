@@ -8,10 +8,30 @@
   color: #fff;
 }
 
-header {
+.Front header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 1rem 2rem;
+}
+
+.Front header .logo-wrapper {
+  align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Front header .logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
+.Front header .logo:hover {
+  color: #1db954;
 }
 
 /* Search wrapper */
@@ -97,7 +117,7 @@ header {
   transform: translateY(0);
 }
 
-.green-button:disabled{
+.green-button:disabled {
   background-color: gray;
 }
 

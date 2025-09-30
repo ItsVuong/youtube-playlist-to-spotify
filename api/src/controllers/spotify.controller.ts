@@ -45,7 +45,7 @@ export async function authCallback(req: Request, res: Response, next: NextFuncti
     //res.redirect("http://localhost:8080?loggedIn=true");
     res.send(`
     <script>
-      window.opener.postMessage({ type: "SPOTIFY_AUTH_SUCCESS" }, "http://localhost:8080");
+      window.opener.postMessage({ type: "SPOTIFY_AUTH_SUCCESS" }, "${process.env.FRONT_END_URL || "http://localhost:8080"}");
       window.close();
     </script>
   `);

@@ -65,7 +65,14 @@ function FrontPage() {
 
   return (
     <div className='Front'>
-      <header>
+      <header >
+        <div className='logo-wrapper'>
+          <a  className='logo'
+            target='_blank'
+            href='https://github.com/ItsVuong/youtube-playlist-to-spotify'>
+            MagicalTaco
+          </a>
+        </div>
         {profile ? (
           profile.images?.length > 0 ? (
             <ProfilePic profilePic={profile.images[0].url} onLogout={signOut} />
